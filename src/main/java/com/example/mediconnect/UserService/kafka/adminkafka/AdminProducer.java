@@ -1,6 +1,7 @@
 package com.example.mediconnect.UserService.kafka.adminkafka;
 
 
+import com.example.mediconnect.UserService.dto.ApproveRequest;
 import com.example.mediconnect.UserService.dto.DepartmentResponse;
 import com.example.mediconnect.UserService.dto.DoctorId;
 import com.example.mediconnect.UserService.dto.UserId;
@@ -100,6 +101,25 @@ public class AdminProducer {
         System.out.println(message);
 
         kafkaTemplate.send(departMentTopic, message);
+
+    }
+
+
+
+    public void ApproveDoctor(ApproveRequest request) {
+        ObjectMapper om = new ObjectMapper();
+
+
+        String message = null;
+        try {
+            message = om.writeValueAsString(request);
+        } catch (
+                JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        System.out.println(message);
+
+        kafkaTemplate.send(approveTopic, message);
 
     }
     public void sendBlockDoctor(DoctorId doctorId) {

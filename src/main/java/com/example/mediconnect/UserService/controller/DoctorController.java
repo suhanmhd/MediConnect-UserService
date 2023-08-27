@@ -7,7 +7,7 @@ import com.example.mediconnect.UserService.dto.*;
 import com.example.mediconnect.UserService.dto.doctor.AvailableSlotResonseDTO;
 import com.example.mediconnect.UserService.dto.doctor.SlotDTO;
 
-import com.example.mediconnect.UserService.dto.user.SlotResponseListDTO;
+import com.example.mediconnect.UserService.entity.Prescription;
 import com.example.mediconnect.UserService.entity.user.UserDetails;
 import com.example.mediconnect.UserService.service.DoctorService;
 import com.example.mediconnect.UserService.service.UserService;
@@ -166,6 +166,28 @@ public class DoctorController {
         response.put("userDetails", userDetails);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+
+    @PostMapping("/prescription")
+    public ResponseEntity<String> createPrescription(@RequestBody PrescriptionDto prescription) {
+        try {
+           String createdPrescription = doctorService.createPrescription(prescription);
+            return new ResponseEntity<>(createdPrescription, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getPatientPrecsription/{userId}")
+    public ResponseEntity<Map<String, List>> getPatientPrecsription(@PathVariable("userId") UUID userId){
+     List<PrescriptionResponse> prescription=  doctorService.getPatientPrescription(userId);
+      Map<String,List>response = new HashMap<>();
+      response.put("prescription",prescription);
+
+
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
 
 
 

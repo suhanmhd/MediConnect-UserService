@@ -183,7 +183,7 @@ private AdminProducer adminProducer;
     public Doctor ApproveDoctor(ApproveRequest request) {
         Optional<DoctorCredentials> optionalDoctorCredentials = doctorRepository.findById(request.getId());
 
-
+               adminProducer.ApproveDoctor(request);
             DoctorCredentials doctorCredentials = optionalDoctorCredentials.get();
             doctorCredentials.setIsApproved(request.getStatus());
 

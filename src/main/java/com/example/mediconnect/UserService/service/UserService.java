@@ -100,23 +100,21 @@ public class UserService {
 
         DoctorCredentials doctorCredentials = doctorRepository.getById(id);
 
-        System.out.println("<<<"+doctorCredentials.getReviews().get(0));
+
         List<DoctorReview> reviews = doctorReviewRepository.findByDoctorId(doctorCredentials.getId());
         List<DoctorReviewResponseDTO> reviewList=new ArrayList<>();
         for (DoctorReview review : reviews) {
             DoctorReviewResponseDTO dto = new DoctorReviewResponseDTO();
             copyProperties(review,dto);
             reviewList.add(dto);
-            System.out.println("Rating: " + review.getUser().getGender());
-            System.out.println("Review: " + review.getReview());
-            // Print other relevant review details
+
         }
         System.out.println(reviews);
 
         Doctor doctor = new Doctor();
         copyProperties(doctorCredentials, doctor);
         doctor.setReviews(reviewList);
-//        System.out.println("??"+doctor.getReviews());
+
         return doctor;
 
     }

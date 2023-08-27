@@ -4,21 +4,24 @@ package com.example.mediconnect.UserService.service;
 
 import com.example.mediconnect.UserService.dto.*;
 import com.example.mediconnect.UserService.dto.doctor.AvailableSlotResonseDTO;
+import com.example.mediconnect.UserService.dto.doctor.DoctorResponse;
 import com.example.mediconnect.UserService.dto.doctor.SlotDTO;
 
 import com.example.mediconnect.UserService.dto.doctor.SlotResponseDTO;
+import com.example.mediconnect.UserService.dto.user.UserResponse;
 import com.example.mediconnect.UserService.entity.AvailableSlot;
+import com.example.mediconnect.UserService.entity.Prescription;
 import com.example.mediconnect.UserService.entity.Slot;
-import com.example.mediconnect.UserService.entity.doctor.ClinicInfo;
-import com.example.mediconnect.UserService.entity.doctor.DoctorCredentials;
-import com.example.mediconnect.UserService.entity.doctor.Education;
-import com.example.mediconnect.UserService.entity.doctor.JobHistory;
+import com.example.mediconnect.UserService.entity.doctor.*;
 import com.example.mediconnect.UserService.entity.user.UserDetails;
 import com.example.mediconnect.UserService.repository.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
@@ -46,6 +49,10 @@ public class DoctorService {
     private AvailableSlotRepository availableSlotRepository;
     @Autowired
     private SlotRepository slotRepository;
+
+
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
 
 
 
@@ -673,6 +680,77 @@ public class DoctorService {
 
 
     }
+
+    public String createPrescription(PrescriptionDto prescriptionDto) {
+        try {
+            DoctorCredentials doctor = doctorRepository.findById(UUID.fromString(prescriptionDto.getDocId()))
+                    .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
+
+            UserDetails user = userDetailsRepository.findById(UUID.fromString(prescriptionDto.getUserId()))
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+            Prescription prescription = new Prescription();
+            prescription.setDoctor(doctor);
+            prescription.setUser(user);
+            prescription.setDays(prescriptionDto.getDays());
+            prescription.setMedicineName(prescriptionDto.getMedicineName());
+            prescription.setQuantity(prescriptionDto.getQuantity());
+            prescription.setTime(prescriptionDto.getTime());
+            prescriptionRepository.save(prescription);
+
+            return "success";
+
+        } catch (EntityNotFoundException ex) {
+            // Handle not found exception, you can log and re-throw or return an appropriate response
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (Exception ex) {
+            // Handle other exceptions, log and return an appropriate response
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating prescription", ex);
+        }
+    }
+
+    public List<PrescriptionResponse> getPatientPrescription(UUID userId) {
+        List<Prescription> prescriptions = prescriptionRepository.findByUserId(userId);
+        List<PrescriptionResponse> prescriptionResponses = new ArrayList<>();
+
+        for (Prescription prescription : prescriptions) {
+            DoctorCredentials doctor = prescription.getDoctor();
+
+            Department department = doctor.getDepartment(); // Get the doctor's department from DoctorCredentials
+//            doctor.setDepartment(department);
+            UserDetails user = prescription.getUser();
+
+            PrescriptionResponse prescriptionResponse = new PrescriptionResponse();
+            prescriptionResponse.setId(prescription.getId());
+
+            // Populate doctor details
+            DoctorResponse doctorResponse = new DoctorResponse();
+            doctorResponse.setId(doctor.getId());
+            doctorResponse.setFirstname(doctor.getFirstname());
+            doctorResponse.setLastname(doctor.getLastname());
+//            doctorResponse.setDepartment(department.getDepartmentName());
+            doctorResponse.setImage(doctor.getImage());
+            prescriptionResponse.setDoctor(doctorResponse);
+
+            // Populate user details
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(user.getId());
+            userResponse.setFirstname(user.getFirstname());
+            userResponse.setLastname(user.getLastname());
+            prescriptionResponse.setUser(userResponse);
+
+            // Populate prescription details
+            prescriptionResponse.setDays(prescription.getDays());
+            prescriptionResponse.setMedicineName(prescription.getMedicineName());
+            prescriptionResponse.setQuantity(prescription.getQuantity());
+            prescriptionResponse.setTime(prescription.getTime());
+
+            prescriptionResponses.add(prescriptionResponse);
+        }
+
+        return prescriptionResponses;
+    }
+
 }
 
 
