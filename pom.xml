@@ -130,6 +130,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>mediconnect-user-registry</finalName>
 	</build>
 
 </project>
