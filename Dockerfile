@@ -1,8 +1,8 @@
 FROM openjdk:17
-EXPOSE 8761
+EXPOSE  8084
 
-ADD target/mediconnect-user-registry.jar mediconnect-user-registry.jar
-ENTRYPOINT ["java","-jar","/mediconnect-user-registry.jar"]
+ADD target/mediconnect-user-service.jar mediconnect-user-service.jar
+ENTRYPOINT ["java","-jar","/mediconnect-user-service.jar"]
 
 
 # Use the official OpenJDK image as a parent image
